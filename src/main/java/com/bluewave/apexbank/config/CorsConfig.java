@@ -18,7 +18,7 @@ public class CorsConfig {
         configuration.setAllowedHeaders(Arrays.asList("Authorization","Content-Type"));
         configuration.setAllowedMethods(Arrays.asList("PUT","GET","DELETE","PATCH","POST"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:5500","http://127.0.0.1:5500"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5500","http://127.0.0.1:5500","https://apexbank-ui.vercel.app"));
 
         UrlBasedCorsConfigurationSource source=new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",configuration);

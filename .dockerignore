@@ -1,0 +1,10 @@
+.git
+.gitignore
+.idea
+.mvn
+target
+*.log
+.env
+*.iml
+HELP.md
+Dockerfile

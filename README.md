@@ -182,3 +182,25 @@ Run packaged executable:
 java -jar target/apexbank-0.0.1-SNAPSHOT.jar
 ```
 The application bootstraps on **Port 8600** by default.
+
+---
+
+## 🐳 Docker & Render Deployment Guide
+
+### Build Docker Image Locally
+```bash
+docker build -t apexbank-backend .
+```
+
+### Run Container Locally
+```bash
+docker run -p 8600:8600 --env-file .env apexbank-backend
+```
+
+### ☁️ Deploying on Render (Web Service)
+1. Push your code to GitHub repository.
+2. In [Render Dashboard](https://dashboard.render.com), click **New +** -> **Web Service**.
+3. Connect your repository.
+4. Select **Docker** as the Runtime environment.
+5. In **Environment Variables**, configure the required runtime keys (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `REDIS_HOST`, `REDIS_PORT`, `JWT_SECRET`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`).
+6. Click **Deploy Web Service**. Render will automatically detect the multi-stage `Dockerfile`, build the artifact, inject the dynamic `$PORT` variable, and start the service!
