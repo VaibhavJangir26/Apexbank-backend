@@ -13,16 +13,41 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
-        CorsConfiguration configuration=new CorsConfiguration();
-        configuration.setAllowedHeaders(Arrays.asList("Authorization","Content-Type"));
-        configuration.setAllowedMethods(Arrays.asList("PUT","GET","DELETE","PATCH","POST"));
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Allow all headers for custom idempotency tokens, auth, etc.
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // Allow all essential HTTP methods including preflight OPTIONS
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
+
+        // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:5500","http://127.0.0.1:5500","https://apexbank-ui.vercel.app"));
 
-        UrlBasedCorsConfigurationSource source=new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**",configuration);
-        return  source;
+        // Allowed origins & origin patterns for local dev and live Vercel/Render deployments
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "https://apexbank-ui.vercel.app",
+                "https://*.vercel.app",
+                "https://apexbank-backend-j74s.onrender.com",
+                "https://*.onrender.com"
+        ));
+
+        // Expose critical response headers
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
+        ));
+
+        // Cache preflight CORS response for 1 hour to reduce preflight roundtrips
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
-
 }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,41 +42,40 @@ public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf->csrf.disable())
-                .cors(c->c.configurationSource(corsConfigurationSource))
+        http.csrf(csrf -> csrf.disable())
+                .cors(c -> c.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(
-                        auth->auth
+                        auth -> auth
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/v1/auth/**").permitAll()
-                                .requestMatchers("/api/v1/account/**").hasAnyRole("ADMIN","MANAGER","CUSTOMER")
-                                .requestMatchers("/api/v1/transaction-limit/**").hasAnyRole("ADMIN","MANAGER","CUSTOMER")
+                                .requestMatchers("/api/v1/account/**").hasAnyRole("ADMIN", "MANAGER", "CUSTOMER")
+                                .requestMatchers("/api/v1/transaction-limit/**").hasAnyRole("ADMIN", "MANAGER", "CUSTOMER")
+                                .requestMatchers("/api/v1/profile/**").hasAnyRole("ADMIN", "MANAGER", "CUSTOMER")
                                 .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2->oauth2.jwt(jwt->jwt.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                .sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        return  http.build();
+        return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(CustomUserDetailsService customUserDetailsService){
-        DaoAuthenticationProvider provider=new DaoAuthenticationProvider(customUserDetailsService);
+    public AuthenticationProvider authenticationProvider(CustomUserDetailsService customUserDetailsService) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
-        return  provider;
+        return provider;
     }
 
-
     @Bean
-    public JwtDecoder jwtDecoder(){
-        SecretKey key= Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    public JwtDecoder jwtDecoder() {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         return NimbusJwtDecoder.withSecretKey(key).build();
     }
 
@@ -102,11 +102,8 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
-
 }
