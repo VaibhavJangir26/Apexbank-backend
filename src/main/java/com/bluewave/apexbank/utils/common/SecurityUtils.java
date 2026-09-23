@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
 public class SecurityUtils {
 
     private final UsersRepo usersRepo;
